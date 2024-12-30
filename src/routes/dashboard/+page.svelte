@@ -68,7 +68,7 @@
 			</div>
 		{:else}
 			<BlurFade
-				delay={0.6}
+				delay={0.3}
 				once
 				class="flex w-full flex-col items-start rounded-md border bg-white p-2 shadow-sm dark:bg-black"
 			>
