@@ -24,10 +24,8 @@
 				<ThemeSwitcher />
 			</nav>
 		</BlurFade>
-		<BlurFade delay={0.75} once class="flex md:hidden">
-			<nav>
-				<Sheet />
-			</nav>
-		</BlurFade>
+		<nav class="flex md:hidden">
+			<Sheet />
+		</nav>
 	</BlurFade>
 </header>

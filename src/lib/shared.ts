@@ -13,5 +13,14 @@ const servicePasswords: Writable<ServicePassword[]> = writable([]);
 // email - email verification
 const currentAuthState: Writable<'loggedin' | 'server' | 'login' | 'register' | 'email'> =
 	writable('server');
+const authTimeoutId: Writable<NodeJS.Timeout | null> = writable(null);
 
-export { instanceUrl, email, currentAuthState, password, userData, servicePasswords };
+export {
+	instanceUrl,
+	email,
+	currentAuthState,
+	password,
+	userData,
+	servicePasswords,
+	authTimeoutId
+};

@@ -6,7 +6,7 @@
 	import { Background } from '$lib/components/background';
 	import { onMount } from 'svelte';
 	import { getExp } from '@/jwt';
-	import { currentAuthState, password, servicePasswords, userData } from '@/shared';
+	import { authTimeoutId, currentAuthState, password, servicePasswords, userData } from '@/shared';
 	import { toast } from 'svelte-sonner';
 	import type { UserData } from '@/user';
 
@@ -28,7 +28,7 @@
 				return;
 			}
 
-			setTimeout(() => {
+			$authTimeoutId = setTimeout(() => {
 				$currentAuthState = 'server';
 				$userData = {} as UserData;
 				$servicePasswords = [];

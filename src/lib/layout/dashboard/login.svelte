@@ -3,7 +3,7 @@
 	import { Button } from '@/components/ui/button';
 	import { Input } from '@/components/ui/input';
 	import { Label } from '@/components/ui/label';
-	import { currentAuthState, instanceUrl } from '@/shared';
+	import { authTimeoutId, currentAuthState, instanceUrl } from '@/shared';
 	import { onMount } from 'svelte';
 	import Icon from '@iconify/svelte';
 	import { login } from '@/auth';
@@ -43,7 +43,10 @@
 				throw new Error();
 			}
 
-			setTimeout(() => {
+			if ($authTimeoutId) {
+				clearTimeout($authTimeoutId);
+			}
+			$authTimeoutId = setTimeout(() => {
 				$currentAuthState = 'server';
 				sessionStorage.removeItem('authToken');
 				toast.warning('Session expired');

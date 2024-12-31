@@ -7,6 +7,7 @@
 	import Icon from '@iconify/svelte';
 	import { onMount } from 'svelte';
 	import { toast } from 'svelte-sonner';
+	import * as argon2 from 'argon2';
 
 	let isLoadingPasswords: boolean = $state(true);
 
@@ -17,6 +18,12 @@
 			orderDirection: 'desc'
 		});
 		isLoadingPasswords = false;
+	};
+
+	const decryptLogin = async () => {
+		const asd = await argon2.hash('asd');
+		console.log(asd);
+		// console.log(await encryptPassword('password', 'password'));
 	};
 
 	onMount(async () => {
@@ -51,7 +58,7 @@
 		<BlurFade delay={0.5} once class="flex w-full flex-row justify-between gap-2">
 			<div>
 				<Button>Add Password</Button>
-				<Button variant="secondary">Export</Button>
+				<Button variant="secondary" onclick={decryptLogin}>Export</Button>
 			</div>
 			<Button variant="secondary" size="icon" onclick={loadPasswords} disabled={isLoadingPasswords}>
 				<Icon icon="lucide:refresh-ccw" />
