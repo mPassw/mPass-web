@@ -3,7 +3,7 @@
 	import { Button } from '@/components/ui/button';
 	import { Input } from '@/components/ui/input';
 	import { Label } from '@/components/ui/label';
-	import { authTimeoutId, currentAuthState, instanceUrl } from '@/shared';
+	import { authTimeoutId, currentAuthState, instanceUrl, password } from '@/shared';
 	import { onMount } from 'svelte';
 	import Icon from '@iconify/svelte';
 	import { login } from '@/auth';
@@ -14,17 +14,17 @@
 	let isLoading: boolean = $state(false);
 
 	let email: string = $state('');
-	let password: string = $state('');
+	let _password: string = $state('');
 
 	const handleLogin = async () => {
 		try {
-			if (!email || !password) {
+			if (!email || !_password) {
 				return;
 			}
 
 			isLoading = true;
 
-			const res = await login(email, password, $instanceUrl);
+			const res = await login(email, _password, $instanceUrl);
 			const data = await res.json();
 
 			if (!data.token) {
@@ -56,6 +56,7 @@
 			localStorage.setItem('savedEmail', email);
 			sessionStorage.setItem('authToken', data.token);
 			$currentAuthState = 'loggedin';
+			$password = _password;
 
 			toast.success('Logged in successfully');
 
@@ -106,7 +107,7 @@
 	<div class="flex w-full flex-col gap-1.5">
 		<Label for="password">Password</Label>
 		<Input
-			bind:value={password}
+			bind:value={_password}
 			disabled={isLoading}
 			class="bg-white shadow-sm dark:bg-black"
 			type="password"

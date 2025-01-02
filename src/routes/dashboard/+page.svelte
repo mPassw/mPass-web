@@ -2,36 +2,81 @@
 	import { BlurFade } from '@/components/animations/blurFade';
 	import { Button } from '@/components/ui/button';
 	import { Separator } from '@/components/ui/separator';
-	import { getPasswords, type ServicePassword } from '@/passwords';
-	import { instanceUrl, servicePasswords, userData } from '@/shared';
+	import { getPasswords } from '@/passwords';
+	import { instanceUrl, password, servicePasswords, userData } from '@/shared';
 	import Icon from '@iconify/svelte';
 	import { onMount } from 'svelte';
 	import { toast } from 'svelte-sonner';
-	import * as argon2 from 'argon2';
+	import { decrypt } from '@/passwords/decrypt';
 
 	let isLoadingPasswords: boolean = $state(true);
 
 	const loadPasswords = async () => {
-		isLoadingPasswords = true;
-		$servicePasswords = await getPasswords($instanceUrl, {
-			orderBy: 'createdAt',
-			orderDirection: 'desc'
-		});
-		isLoadingPasswords = false;
-	};
+		if ($servicePasswords.length > 0) {
+			isLoadingPasswords = false;
+			return;
+		}
 
-	const decryptLogin = async () => {
-		const asd = await argon2.hash('asd');
-		console.log(asd);
-		// console.log(await encryptPassword('password', 'password'));
+		// const startTime = performance.now();
+		try {
+			isLoadingPasswords = true;
+			$servicePasswords = await getPasswords($instanceUrl, {
+				orderBy: 'createdAt',
+				orderDirection: 'desc'
+			});
+
+			await Promise.all(
+				$servicePasswords.map(async (servicePassword) => {
+					const decryptionPromises = [];
+
+					if (servicePassword.login) {
+						decryptionPromises.push(
+							decrypt(
+								$password,
+								servicePassword.salt,
+								servicePassword.nonce,
+								servicePassword.login
+							).then((decrypted) => (servicePassword.login = decrypted))
+						);
+					}
+
+					if (servicePassword.password) {
+						decryptionPromises.push(
+							decrypt(
+								$password,
+								servicePassword.salt,
+								servicePassword.nonce,
+								servicePassword.password
+							).then((decrypted) => (servicePassword.password = decrypted))
+						);
+					}
+
+					if (servicePassword.note) {
+						decryptionPromises.push(
+							decrypt(
+								$password,
+								servicePassword.salt,
+								servicePassword.nonce,
+								servicePassword.note
+							).then((decrypted) => (servicePassword.note = decrypted))
+						);
+					}
+
+					await Promise.all(decryptionPromises);
+				})
+			);
+		} catch {
+			$servicePasswords = [];
+			toast.error('Failed to load passwords');
+		} finally {
+			isLoadingPasswords = false;
+			// const endTime = performance.now();
+			// console.log(`Password loading took ${(endTime - startTime).toFixed(2)}ms`);
+		}
 	};
 
 	onMount(async () => {
-		try {
-			await loadPasswords();
-		} catch {
-			toast.error('Failed to load passwords');
-		}
+		await loadPasswords();
 	});
 </script>
 
@@ -58,9 +103,17 @@
 		<BlurFade delay={0.5} once class="flex w-full flex-row justify-between gap-2">
 			<div>
 				<Button>Add Password</Button>
-				<Button variant="secondary" onclick={decryptLogin}>Export</Button>
+				<Button variant="secondary">Export</Button>
 			</div>
-			<Button variant="secondary" size="icon" onclick={loadPasswords} disabled={isLoadingPasswords}>
+			<Button
+				variant="secondary"
+				size="icon"
+				onclick={async () => {
+					$servicePasswords = [];
+					await loadPasswords();
+				}}
+				disabled={isLoadingPasswords}
+			>
 				<Icon icon="lucide:refresh-ccw" />
 			</Button>
 		</BlurFade>
@@ -98,7 +151,7 @@
 								<p>{new Date(password.createdAt).toLocaleString()}</p>
 							</div>
 						</div>
-						{#if index !== 4}
+						{#if index !== $servicePasswords.slice(0, 5).length - 1}
 							<Separator />
 						{/if}
 					{/each}

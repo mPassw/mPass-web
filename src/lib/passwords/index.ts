@@ -1,3 +1,9 @@
-import { getPasswords, type ServicePassword } from './getPasswords';
+export { getPasswords, type ServicePassword } from './getPasswords';
 
-export { getPasswords, type ServicePassword };
+export {
+	hexStringToBytes,
+	generateSalt,
+	generateNonce,
+	base64toUintArray,
+	uintArrayToBase64
+} from './helpers';
