@@ -4,7 +4,7 @@
 	import * as Drawer from '$lib/components/ui/drawer/index';
 	import { BlurFade } from '@/components/animations/blurFade';
 	import { buttonVariants } from '@/components/ui/button';
-	import { currentAuthState, instanceUrl, userData } from '@/shared';
+	import { currentAuthState, instanceUrl, servicePasswords, userData } from '@/shared';
 	import { getMe } from '@/user';
 	import Icon from '@iconify/svelte';
 	import { onMount } from 'svelte';
@@ -15,6 +15,7 @@
 
 	onMount(() => {
 		if ($currentAuthState !== 'loggedin') {
+			$servicePasswords = [];
 			goto('/auth');
 			return;
 		}

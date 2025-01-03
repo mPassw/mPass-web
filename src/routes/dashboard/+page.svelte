@@ -17,7 +17,7 @@
 			return;
 		}
 
-		// const startTime = performance.now();
+		const startTime = performance.now();
 		try {
 			isLoadingPasswords = true;
 			$servicePasswords = await getPasswords($instanceUrl, {
@@ -70,8 +70,8 @@
 			toast.error('Failed to load passwords');
 		} finally {
 			isLoadingPasswords = false;
-			// const endTime = performance.now();
-			// console.log(`Password loading took ${(endTime - startTime).toFixed(2)}ms`);
+			const endTime = performance.now();
+			console.log(`Password loading took ${(endTime - startTime).toFixed(2)}ms`);
 		}
 	};
 
@@ -118,15 +118,19 @@
 			</Button>
 		</BlurFade>
 		{#if isLoadingPasswords}
-			<div class="mt-24 flex w-full justify-center">
-				<Icon icon="svg-spinners:pulse-multiple" font-size="64px" />
+			<div class="mt-24 flex w-full flex-col items-center justify-center gap-2">
+				<Icon icon="svg-spinners:gooey-balls-2" font-size="32px" />
+				<h2 class="text-lg font-semibold tracking-tight">Decrypting data...</h2>
 			</div>
 		{:else if $servicePasswords.length === 0}
-			<div class="mt-4 flex flex-row items-center justify-center gap-2">
+			<BlurFade delay={0.3} once class="mt-4 flex flex-row items-center justify-center gap-2">
 				<Icon icon="tabler:database-x" font-size="24px" />
 				<h4 class="text-xl font-semibold tracking-tight">No passwords found</h4>
-			</div>
+			</BlurFade>
 		{:else}
+			<BlurFade delay={0.3} once class="text-xl font-semibold tracking-tight">
+				Recent Passwords
+			</BlurFade>
 			<BlurFade
 				delay={0.3}
 				once
