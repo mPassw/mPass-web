@@ -17,7 +17,7 @@
 			return;
 		}
 
-		const startTime = performance.now();
+		// const startTime = performance.now();
 		try {
 			isLoadingPasswords = true;
 			$servicePasswords = await getPasswords($instanceUrl, {
@@ -65,13 +65,14 @@
 					await Promise.all(decryptionPromises);
 				})
 			);
-		} catch {
+		} catch (err) {
+			console.error(err);
 			$servicePasswords = [];
 			toast.error('Failed to load passwords');
 		} finally {
 			isLoadingPasswords = false;
-			const endTime = performance.now();
-			console.log(`Password loading took ${(endTime - startTime).toFixed(2)}ms`);
+			// const endTime = performance.now();
+			// console.log(`Password loading took ${(endTime - startTime).toFixed(2)}ms`);
 		}
 	};
 

@@ -1,31 +1,21 @@
+import { xchacha20poly1305 } from '@noble/ciphers/chacha';
+import { base64toUintArray, derive } from './helpers';
+
 const decrypt = async (
 	masterPassword: string,
 	salt: string,
 	nonce: string,
 	encrypted: string
 ): Promise<string> => {
-	return new Promise((resolve, reject) => {
-		const worker = new Worker(new URL('./decryptWorker.ts', import.meta.url), {
-			type: 'module'
-		});
+	const key = await derive(masterPassword, salt);
+	const chacha = xchacha20poly1305(key, base64toUintArray(nonce));
+	const decrypted = chacha.decrypt(base64toUintArray(encrypted));
 
-		worker.postMessage({ masterPassword, salt, nonce, encrypted });
+	if (!decrypted) {
+		throw new Error('Decryption failed');
+	}
 
-		worker.onmessage = (event) => {
-			if ('error' in event.data) {
-				worker.terminate();
-				reject(event.data.error);
-			} else {
-				worker.terminate();
-				resolve(event.data.decrypted);
-			}
-		};
-
-		worker.onerror = (error) => {
-			worker.terminate();
-			reject(error);
-		};
-	});
+	return new TextDecoder().decode(decrypted);
 };
 
 export { decrypt };

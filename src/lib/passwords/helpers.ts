@@ -1,5 +1,5 @@
-// @ts-expect-error - type is missing
-import argon2 from 'argon2-browser/dist/argon2-bundled.min.js';
+import wasm from '@phi-ag/argon2/argon2.wasm?url';
+import initialize from '@phi-ag/argon2/fetch';
 
 const uintArrayToBase64 = (uintArray: Uint8Array): string => {
 	let binaryString = '';
@@ -52,17 +52,18 @@ const generateNonce = (length: number = 12): Uint8Array => {
 };
 
 const derive = async (masterPassword: string, salt: string): Promise<Uint8Array> => {
-	const key = await argon2.hash({
-		pass: masterPassword,
-		salt: atob(salt),
-		time: 2,
-		mem: 19456,
-		hashLen: 32,
+	const argon2 = await initialize(wasm);
+
+	const result = argon2.hash(masterPassword, {
+		salt: base64toUintArray(salt),
+		timeCost: 2,
+		hashLength: 32,
+		memoryCost: 19456,
 		parallelism: 1,
-		type: argon2.ArgonType.Argon2id
+		version: 19
 	});
 
-	return key.hash as Uint8Array;
+	return result.hash;
 };
 
 export {
