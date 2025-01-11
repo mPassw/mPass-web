@@ -1,4 +1,4 @@
-# mPass Server
+# mPass Web
 
 Web app for mPass passsword manager
 
