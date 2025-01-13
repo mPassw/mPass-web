@@ -13,7 +13,7 @@ const register = async (email: string, username: string, password: string): Prom
 			email,
 			username,
 			salt,
-			verifier: verifier
+			verifier: btoa(verifier)
 		})
 	});
 

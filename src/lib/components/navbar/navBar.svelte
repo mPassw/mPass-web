@@ -49,7 +49,7 @@
 		once
 		class="mx-auto flex h-[50px] w-full max-w-[1000px] items-center justify-between px-3"
 	>
-		<a href="/" class="text-2xl font-semibold tracking-tight"> mPass </a>
+		<a href="/" class="text-2xl font-semibold tracking-tight">mPass</a>
 		<nav class="hidden flex-row items-center gap-1 md:flex">
 			{#each buttons as button}
 				<Button variant="link" href={button.href}>
