@@ -11,10 +11,11 @@ export const getIcon = (url: string): string => {
 
 		const parsedUrl = new URL(urlToCheck);
 
-		// `https://www.google.com/s2/favicons?domain=${domain}&sz=64`;
-		// `https://logo.clearbit.com/${domain}`;
-		// `https://icon.horse/icon/${domain}`;
-		return `https://api.faviconkit.com/${parsedUrl.hostname}/144`;
+		return `https://www.google.com/s2/favicons?domain=${parsedUrl.hostname}&sz=64`;
+		// return `https://logo.clearbit.com/${parsedUrl.hostname}`;
+		// return `https://icon.horse/icon/${parsedUrl.hostname}`;
+		// return `https://api.faviconkit.com/${parsedUrl.hostname}/144`;
+		// return `https://icons.duckduckgo.com/ip3/${parsedUrl.hostname}.ico`;
 	} catch {
 		return '';
 	}
