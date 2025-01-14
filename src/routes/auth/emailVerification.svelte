@@ -25,12 +25,12 @@
 			});
 
 			if (!res.ok) {
-				throw new Error();
+				throw new Error(await res.text());
 			}
 
 			toast.success('Code resent');
-		} catch {
-			toast.error('Unknown error');
+		} catch (err: any) {
+			toast.error(err.message || 'Unknown error');
 		} finally {
 			isLoading = false;
 		}

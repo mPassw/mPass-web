@@ -12,13 +12,70 @@
 	import { updateUsername } from '@/user/updateUsername.svelte';
 	import Icon from '@iconify/svelte';
 	import { toast } from 'svelte-sonner';
+	import { updateEmail, updateEmailGetCode } from '@/user/updateEmail.svelte';
+	import { generateSaltAndVerifier } from '@/auth/register.svelte';
 
 	let isLoading: boolean = $state(false);
 
 	let masterPassword: string = $state('');
 
 	let newEmail: string = $state('');
+	let newEmailVeirificationCode: number | null = $state(null);
+
 	let newUsername: string = $state('');
+
+	const requestEmailVerificationCode = async () => {
+		try {
+			isLoading = true;
+
+			await updateEmailGetCode();
+			toast.success('Verification code sent');
+		} catch (err: any) {
+			toast.error(err.message || 'Unknown error');
+		} finally {
+			isLoading = false;
+		}
+	};
+
+	const _updateEmail = async () => {
+		try {
+			isLoading = true;
+
+			if (!newEmail) {
+				toast.error('New email is required');
+				return;
+			}
+
+			if (!newEmailVeirificationCode) {
+				toast.error('Verification code is required');
+				return;
+			}
+
+			if (!masterPassword) {
+				toast.error('Master password is required');
+				return;
+			}
+
+			const { salt, verifier } = await generateSaltAndVerifier(newEmail, masterPassword);
+			await updateEmail(
+				newEmail,
+				newEmailVeirificationCode.toString(),
+				salt,
+				btoa(verifier),
+				masterPassword
+			);
+			await deauthorizeSessions();
+
+			userState.reset();
+			await goto('/auth');
+
+			toast.success('Email updated');
+		} catch (err: any) {
+			toast.error(err.message || 'Unknown error');
+		} finally {
+			isLoading = false;
+		}
+	};
 
 	const _updateUsername = async () => {
 		try {
@@ -98,11 +155,12 @@
 				<Tabs.Trigger value="username" class="w-1/2">Change Username</Tabs.Trigger>
 			</Tabs.List>
 			<Tabs.Content value="email">
-				<div class="flex w-full flex-col gap-4 pt-2">
+				<div class="flex w-full flex-col gap-2 pt-2">
 					<div class="grid w-full items-center gap-1.5">
 						<Label for="new-email">New Email</Label>
 						<Input
 							bind:value={newEmail}
+							disabled={isLoading}
 							type="email"
 							id="new-email"
 							placeholder="mail@example.com"
@@ -110,23 +168,48 @@
 					</div>
 
 					<div class="grid w-full items-center gap-1.5">
+						<Label for="new-email">Verification Code</Label>
+						<Input
+							bind:value={newEmailVeirificationCode}
+							disabled={isLoading}
+							type="number"
+							id="new-email-verification-code"
+							placeholder="123456"
+						/>
+					</div>
+					<Button
+						class="self-start"
+						variant="link"
+						disabled={isLoading}
+						onclick={requestEmailVerificationCode}
+					>
+						<Icon icon="lucide:mail-plus" font-size="20" />
+						Request Code
+					</Button>
+
+					<div class="grid w-full items-center gap-1.5">
 						<Label for="master-password">Master Password</Label>
 						<Input
 							bind:value={masterPassword}
+							disabled={isLoading}
 							type="password"
 							id="master-password"
 							placeholder="********"
 						/>
 					</div>
 
-					<Button variant="link" class="self-start">
+					<Button variant="link" class="self-start" disabled={isLoading} onclick={_updateEmail}>
 						<Icon icon="lucide:save" font-size="20" />
 						Save
 					</Button>
+					<p class="text-sm text-muted-foreground">
+						Changing your email will log you out of all devices. You will need to log in again on
+						each device.
+					</p>
 				</div>
 			</Tabs.Content>
 			<Tabs.Content value="username">
-				<div class="flex w-full flex-col gap-4 pt-2">
+				<div class="flex w-full flex-col gap-2 pt-2">
 					<div class="grid w-full items-center gap-1.5">
 						<Label for="new-username"
 							>New Username <span class="text-muted-foreground">(leave empty to remove)</span
@@ -134,6 +217,7 @@
 						>
 						<Input
 							bind:value={newUsername}
+							disabled={isLoading}
 							type="text"
 							id="new-username"
 							placeholder="coolname69420"
@@ -144,6 +228,7 @@
 						<Label for="master-password">Master Password</Label>
 						<Input
 							bind:value={masterPassword}
+							disabled={isLoading}
 							type="password"
 							id="master-password"
 							placeholder="********"

@@ -24,8 +24,6 @@ const register = async (email: string, username: string, password: string): Prom
 	return res;
 };
 
-export { register };
-
 const generateSaltAndVerifier = async (
 	email: string,
 	password: string
@@ -55,3 +53,5 @@ const generateSaltAndVerifier = async (
 		verifier: verifier.toString(16)
 	};
 };
+
+export { register, generateSaltAndVerifier };
