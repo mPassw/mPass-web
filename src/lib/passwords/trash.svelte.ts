@@ -1,4 +1,4 @@
-import { passwordsState, type TrashedPassword } from '@/state/passwordsState.svelte';
+import { passwordsState } from '@/state/passwordsState.svelte';
 import { userState } from '@/state/userState.svelte';
 
 const movePasswordToTrash = async (id: number) => {
@@ -10,14 +10,14 @@ const movePasswordToTrash = async (id: number) => {
 	});
 
 	if (!res.ok) {
-		throw new Error('Failed to trash password');
+		throw new Error(await res.json());
 	}
 
-	passwordsState.removePassword(id);
+	passwordsState.moveToTrash(id);
 };
 
-const movePasswordFromTrash = async (password: TrashedPassword) => {
-	const res = await fetch(`${userState.serverUrl}/passwords/from-trash/${password.id}`, {
+const movePasswordFromTrash = async (id: number) => {
+	const res = await fetch(`${userState.serverUrl}/passwords/from-trash/${id}`, {
 		method: 'POST',
 		headers: {
 			Authorization: `Bearer ${userState.authToken}`
@@ -25,10 +25,10 @@ const movePasswordFromTrash = async (password: TrashedPassword) => {
 	});
 
 	if (!res.ok) {
-		throw new Error('Failed to move password from trash');
+		throw new Error(await res.json());
 	}
 
-	passwordsState.addPassword(password);
+	passwordsState.moveFromTrash(id);
 };
 
 export { movePasswordToTrash, movePasswordFromTrash };

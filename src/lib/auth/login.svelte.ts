@@ -39,7 +39,7 @@ const requestSalt = async (): Promise<string> => {
 	});
 
 	if (!res.ok) {
-		throw new Error();
+		throw new Error(await res.json());
 	}
 
 	const data = await res.json();
@@ -60,7 +60,7 @@ const sendCrenentials = async (A: string): Promise<bigint> => {
 	});
 
 	if (!res.ok) {
-		throw new Error();
+		throw new Error(await res.json());
 	}
 
 	const data = await res.json();
@@ -81,7 +81,7 @@ const verifyProof = async (M1: string): Promise<string> => {
 	});
 
 	if (!res.ok) {
-		throw new Error();
+		throw new Error(await res.json());
 	}
 
 	const data = await res.json();

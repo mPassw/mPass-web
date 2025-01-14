@@ -24,8 +24,8 @@
 			userState.postLogin(token);
 
 			await goto('/dashboard');
-		} catch {
-			toast.error('Invalid credentials');
+		} catch (err: any) {
+			toast.error(err.message || 'Unknown error');
 		} finally {
 			isLoading = false;
 		}

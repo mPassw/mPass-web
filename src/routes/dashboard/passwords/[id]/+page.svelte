@@ -13,7 +13,8 @@
 	import PasswordAuthData from './passwordAuthData.svelte';
 	import PasswordWebsites from './passwordWebsites.svelte';
 	import PasswordNote from './passwordNote.svelte';
-	import { movePasswordToTrash } from '@/passwords/trash.svelte';
+	import { movePasswordFromTrash, movePasswordToTrash } from '@/passwords/trash.svelte';
+	import { deletePassword } from '@/passwords/deletePassword.svelte';
 
 	let { data }: { data: PageData } = $props();
 
@@ -61,12 +62,45 @@
 			isLoading = true;
 
 			await movePasswordToTrash(password.id);
-			passwordsState.removePassword(password.id);
 
 			await goto('/dashboard');
 			toast.success('Password moved to trash');
 		} catch {
 			toast.error('Failed to move password to trash');
+		} finally {
+			isLoading = false;
+		}
+	};
+
+	const restore = async () => {
+		try {
+			if (!password) throw new Error('Password not found');
+
+			isLoading = true;
+
+			await movePasswordFromTrash(password.id);
+
+			await goto('/dashboard/trash');
+			toast.success('Password restored');
+		} catch {
+			toast.error('Failed restore password');
+		} finally {
+			isLoading = false;
+		}
+	};
+
+	const delPassword = async () => {
+		try {
+			if (!password) throw new Error('Password not found');
+
+			isLoading = true;
+
+			await deletePassword(password.id);
+
+			await goto('/dashboard/trash');
+			toast.success('Password deleted');
+		} catch {
+			toast.error('Failed delete password');
 		} finally {
 			isLoading = false;
 		}
@@ -89,23 +123,41 @@
 		</div>
 	{:else}
 		<div class="flex w-full flex-col gap-4">
-			<div class="flex w-full flex-row items-center justify-between gap-2">
-				<Button href="/dashboard" variant="secondary">
-					<Icon icon="lucide:chevron-left" font-size="18" />
-					Back
-				</Button>
-				<div class="flex flex-row items-center gap-2">
-					<Button disabled={isLoading} variant="default" onclick={updatePassword}>
-						<Icon icon="lucide:save" font-size="18" />
-						Save
+			{#if password.inTrash}
+				<div class="flex w-full flex-row items-center justify-between gap-2">
+					<Button href="/dashboard" variant="secondary">
+						<Icon icon="lucide:chevron-left" font-size="18" />
+						Back
 					</Button>
-					<Button disabled={isLoading} variant="destructive" onclick={moveToTrash}>
-						<Icon icon="lucide:trash" font-size="18" />
-						Trash
-					</Button>
+					<div class="flex flex-row items-center gap-2">
+						<Button disabled={isLoading} variant="default" onclick={restore}>
+							<Icon icon="lucide:redo-2" font-size="18" />
+							Restore
+						</Button>
+						<Button disabled={isLoading} variant="destructive" onclick={delPassword}>
+							<Icon icon="lucide:x" font-size="18" />
+							Delete
+						</Button>
+					</div>
 				</div>
-			</div>
-
+			{:else}
+				<div class="flex w-full flex-row items-center justify-between gap-2">
+					<Button href="/dashboard" variant="secondary">
+						<Icon icon="lucide:chevron-left" font-size="18" />
+						Back
+					</Button>
+					<div class="flex flex-row items-center gap-2">
+						<Button disabled={isLoading} variant="default" onclick={updatePassword}>
+							<Icon icon="lucide:save" font-size="18" />
+							Save
+						</Button>
+						<Button disabled={isLoading} variant="destructive" onclick={moveToTrash}>
+							<Icon icon="lucide:trash" font-size="18" />
+							Trash
+						</Button>
+					</div>
+				</div>
+			{/if}
 			<PasswordTitle {password} {isLoading} />
 			<PasswordAuthData {password} {isLoading} />
 			<PasswordWebsites {password} {isLoading} />

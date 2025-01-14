@@ -1,11 +1,14 @@
 <script lang="ts">
+	import * as Dialog from '$lib/components/ui/dialog/index';
 	import * as Tabs from '$lib/components/ui/tabs/index';
 	import { BlurFade } from '@/animations/blurFade';
-	import { Button } from '@/components/ui/button';
+	import { Button, buttonVariants } from '@/components/ui/button';
 	import { Input } from '@/components/ui/input';
 	import { Label } from '@/components/ui/label';
+	import { goto } from '$app/navigation';
 	import { passwordsState } from '@/state/passwordsState.svelte';
 	import { userState } from '@/state/userState.svelte';
+	import { deauthorizeSessions } from '@/user/deauthorizeSessions.svelte';
 	import { updateUsername } from '@/user/updateUsername.svelte';
 	import Icon from '@iconify/svelte';
 	import { toast } from 'svelte-sonner';
@@ -47,6 +50,25 @@
 			isLoading = false;
 		}
 	};
+
+	let isDeauthorizeDialogOpen: boolean = $state(false);
+	const deauthorize = async () => {
+		try {
+			isLoading = true;
+
+			await deauthorizeSessions();
+
+			userState.reset();
+			isDeauthorizeDialogOpen = false;
+
+			await goto('/auth');
+			toast.success('All sessions deauthorized');
+		} catch (err: any) {
+			toast.error(err.message || 'Unknown error');
+		} finally {
+			isLoading = false;
+		}
+	};
 </script>
 
 <BlurFade delay={0.1} once class="flex w-full flex-col gap-4 p-4 pb-20 xl:pb-0">
@@ -58,7 +80,7 @@
 		<div class="flex w-full flex-col">
 			<h1 class="text-lg font-semibold">Username</h1>
 			<p class="text-muted-foreground">
-				{userState.username ?? 'none'}
+				{userState.username?.length ? userState.username : 'none'}
 			</p>
 		</div>
 		<div class="flex w-full flex-col">
@@ -141,12 +163,33 @@
 		class="flex w-full flex-col gap-2 rounded-md border border-destructive bg-white p-4 shadow-md dark:bg-black"
 	>
 		<h1 class="text-lg font-semibold text-destructive">Danger Zone</h1>
-		<div class="flex flex-row items-start gap-2">
+		<div class="flex flex-row flex-wrap items-start gap-2">
+			<Dialog.Root bind:open={isDeauthorizeDialogOpen}>
+				<Dialog.Trigger class={buttonVariants({ variant: 'destructive' })}>
+					<Icon icon="lucide:shield-alert" font-size="20" />
+					Deauthorize Sessions
+				</Dialog.Trigger>
+				<Dialog.Content>
+					<Dialog.Header>
+						<Dialog.Title>Are you sure absolutely sure?</Dialog.Title>
+						<Dialog.Description>
+							Deauthorizing all sessions will log you out of all devices. You will need to log in
+							again on each device.
+						</Dialog.Description>
+					</Dialog.Header>
+					<Dialog.Footer>
+						<Button variant="destructive" onclick={deauthorize}>Deauthorize</Button>
+						<Button variant="default" onclick={() => (isDeauthorizeDialogOpen = false)}>
+							Cancel
+						</Button>
+					</Dialog.Footer>
+				</Dialog.Content>
+			</Dialog.Root>
 			<Button variant="destructive">
 				<Icon icon="material-symbols:password-2-off-rounded" font-size="20" />
 				Delete Passwords
 			</Button>
-			<Button variant="destructive" disabled={userState.isAdmin}>
+			<Button variant="destructive" disabled>
 				<Icon icon="lucide:user-round-x" font-size="20" />
 				Delete Account
 			</Button>

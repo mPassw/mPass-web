@@ -110,11 +110,14 @@
 						<Avatar.Root>
 							<Avatar.Image src="" alt="@me" />
 							<Avatar.Fallback>
-								{userState.username?.slice(0, 2).toUpperCase() ??
-									userState.email.slice(0, 2).toUpperCase()}
+								{userState.username?.length
+									? userState.username.slice(0, 2).toUpperCase()
+									: userState.email.slice(0, 2).toUpperCase()}
 							</Avatar.Fallback>
 						</Avatar.Root>
-						<p class="truncate font-semibold">{userState.username ?? userState.email}</p>
+						<p class="truncate font-semibold">
+							{userState.username?.length ? userState.username : userState.email}
+						</p>
 					</div>
 				</BlurFade>
 				<BlurFade delay={0.3} once class="flex w-full flex-col gap-1.5 px-2">

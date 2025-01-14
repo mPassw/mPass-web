@@ -17,8 +17,9 @@
 	const filteredPasswords = $derived(
 		passwordsState.passwords.filter(
 			(password) =>
-				password.title.toLowerCase().includes(search.toLowerCase()) ||
-				password.websites.some((website) => website.toLowerCase().includes(search.toLowerCase()))
+				!password.inTrash &&
+				(password.title.toLowerCase().includes(search.toLowerCase()) ||
+					password.websites.some((website) => website.toLowerCase().includes(search.toLowerCase())))
 		)
 	);
 </script>
@@ -55,7 +56,7 @@
 			type="text"
 		/>
 	</div>
-	<div class="flex w-full flex-row items-center gap-2">
+	<div class="flex w-full flex-row items-center justify-between">
 		<Button
 			disabled={isLoading || !userState.isEmailVerified}
 			variant="default"

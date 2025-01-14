@@ -1,31 +1,16 @@
 <script lang="ts">
 	import * as ContextMenu from '$lib/components/ui/context-menu/index';
 	import * as Avatar from '$lib/components/ui/avatar/index';
-	import { type Password } from '@/state/passwordsState.svelte';
 	import Icon from '@iconify/svelte';
+	import { type Password } from '@/state/passwordsState.svelte';
 	import { onMount } from 'svelte';
 	import { decryptPassword } from '@/passwords/decryptPassword.svelte';
 	import { toast } from 'svelte-sonner';
 	import { movePasswordToTrash } from '@/passwords/trash.svelte';
+	import { getIcon } from '@/utils';
 
 	let { password }: { password: Password } = $props();
 	let favicon: string = $state('');
-
-	const extractDomain = (url: string): string => {
-		try {
-			const urlWithProtocol = url.startsWith('http') ? url : `https://${url}`;
-			const hostname = new URL(urlWithProtocol).hostname;
-			const parts = hostname.split('.');
-
-			if (parts.length > 2 && parts[parts.length - 2] === 'co') {
-				return parts.slice(-3).join('.');
-			}
-
-			return parts.slice(-2).join('.');
-		} catch {
-			return url;
-		}
-	};
 
 	const handleCopy = async (text: string) => {
 		if (!password.decrypted) {
@@ -40,18 +25,14 @@
 		try {
 			await movePasswordToTrash(password.id);
 			toast.success('Moved to trash');
-		} catch {
-			toast.error('Failed to move to trash');
+		} catch (err: any) {
+			toast.error(err.message || 'Unknown error');
 		}
 	};
 
 	onMount(() => {
 		if (password.websites.length > 0 && password.websites[0].length > 0) {
-			const domain = extractDomain(password.websites[0]);
-			// favicon = `https://www.google.com/s2/favicons?domain=${domain}&sz=64`;
-			// favicon = `https://api.faviconkit.com/${domain}/144`;
-			// favicon = `https://logo.clearbit.com/${domain}`;
-			favicon = `https://icon.horse/icon/${domain}`;
+			favicon = getIcon(password.websites[0]);
 		}
 	});
 </script>
@@ -86,8 +67,10 @@
 				}
 
 				await handleCopy(password.login);
-			}}>Copy Login</ContextMenu.Item
+			}}
 		>
+			Copy Login
+		</ContextMenu.Item>
 		<ContextMenu.Item
 			disabled={!password.password}
 			onclick={async () => {
@@ -97,8 +80,10 @@
 				}
 
 				await handleCopy(password.password);
-			}}>Copy Password</ContextMenu.Item
+			}}
 		>
+			Copy Password
+		</ContextMenu.Item>
 		<ContextMenu.Item
 			disabled={!password.note}
 			onclick={async () => {
@@ -108,13 +93,17 @@
 				}
 
 				await handleCopy(password.note);
-			}}>Copy Note</ContextMenu.Item
+			}}
 		>
+			Copy Note
+		</ContextMenu.Item>
 		<ContextMenu.Item
 			class="text-red-600"
 			onclick={async () => {
 				await handleMoveToTrash();
-			}}>Move to Trash</ContextMenu.Item
+			}}
 		>
+			Move to Trash
+		</ContextMenu.Item>
 	</ContextMenu.Content>
 </ContextMenu.Root>

@@ -22,11 +22,8 @@ type Password = PasswordBase & {
 	id: number;
 	createdAt: Date;
 	updatedAt?: Date;
+	inTrash: boolean;
 	decrypted: boolean;
-};
-
-type TrashedPassword = Password & {
-	deletedAt: Date;
 };
 
 class Encryptor {
@@ -106,9 +103,25 @@ class PasswordsData {
 	updatePassword(password: Password) {
 		this.passwords = this.passwords.map((p) => (p.id === password.id ? password : p));
 	}
+
+	moveToTrash(id: number) {
+		const password = this.getPassword(id);
+
+		if (password) {
+			this.updatePassword({ ...password, inTrash: true });
+		}
+	}
+
+	moveFromTrash(id: number) {
+		const password = this.getPassword(id);
+
+		if (password) {
+			this.updatePassword({ ...password, inTrash: false });
+		}
+	}
 }
 
 const encryptor = new Encryptor();
 const passwordsState = new PasswordsData();
 
-export { encryptor, passwordsState, type Password, type PasswordBase, type TrashedPassword };
+export { encryptor, passwordsState, type Password, type PasswordBase };

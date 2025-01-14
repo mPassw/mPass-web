@@ -1,58 +1,27 @@
 <script lang="ts">
 	import Icon from '@iconify/svelte';
 	import { BlurFade } from '@/animations/blurFade';
+	import { Button } from '@/components/ui/button';
 	import { Input } from '@/components/ui/input';
-	import { onMount } from 'svelte';
-	import { getTrash } from '@/passwords/getPasswords.svelte';
-	import type { TrashedPassword } from '@/state/passwordsState.svelte';
-	import TrashedPasswordCard from './trashedPasswordCard.svelte';
+	import { getPasswords } from '@/passwords/getPasswords.svelte';
+	import { passwordsState } from '@/state/passwordsState.svelte';
+	import { userState } from '@/state/userState.svelte';
+	import { goto } from '$app/navigation';
 	import { toast } from 'svelte-sonner';
-	import { movePasswordFromTrash } from '@/passwords/trash.svelte';
-	import { deletePassword } from '@/passwords/deletePassword.svelte';
+	import TrashedPasswordCard from './trashedPasswordCard.svelte';
 
-	let isLoading: boolean = $state(true);
-
-	let passwords: TrashedPassword[] = $state([]);
+	let isLoading: boolean = $state(false);
 
 	let search: string = $state('');
+
 	const filteredPasswords = $derived(
-		passwords.filter(
+		passwordsState.passwords.filter(
 			(password) =>
-				password.title.toLowerCase().includes(search.toLowerCase()) ||
-				password.websites.some((website) => website.toLowerCase().includes(search.toLowerCase()))
+				password.inTrash &&
+				(password.title.toLowerCase().includes(search.toLowerCase()) ||
+					password.websites.some((website) => website.toLowerCase().includes(search.toLowerCase())))
 		)
 	);
-
-	const handleRemoveFromTrash = async (password: TrashedPassword) => {
-		try {
-			await movePasswordFromTrash(password);
-
-			passwords = passwords.filter((p) => p.id !== password.id);
-
-			toast.success('Removed from trash');
-		} catch {
-			toast.error('Failed to remove from trash');
-		}
-	};
-
-	const handlePermanentDelete = async (password: TrashedPassword) => {
-		try {
-			await deletePassword(password.id, true);
-
-			passwords = passwords.filter((p) => p.id !== password.id);
-
-			toast.success('Password deleted');
-		} catch {
-			toast.error('Failed to permanently delete password');
-		}
-	};
-
-	onMount(async () => {
-		passwords = [];
-		passwords = await getTrash();
-
-		isLoading = false;
-	});
 </script>
 
 <BlurFade delay={0.1} once class="flex w-full flex-col gap-2 p-4 pb-20 xl:pb-0">
@@ -64,6 +33,26 @@
 			class="bg-white shadow-sm dark:bg-black"
 			type="text"
 		/>
+	</div>
+	<div class="flex w-full flex-row items-center justify-end">
+		<Button
+			disabled={isLoading}
+			variant="secondary"
+			size="icon"
+			onclick={() => {
+				isLoading = true;
+				getPasswords()
+					.then(() => {
+						isLoading = false;
+					})
+					.catch(() => {
+						toast.error('Failed to fetch passwords');
+						isLoading = false;
+					});
+			}}
+		>
+			<Icon icon="lucide:refresh-cw" font-size="20" />
+		</Button>
 	</div>
 
 	{#if isLoading}
@@ -77,9 +66,14 @@
 		</div>
 	{:else}
 		<BlurFade delay={0.1} once class="flex flex-col">
+			<!-- <div class="flex w-full flex-row items-center space-x-2 p-2">
+				<div class="w-1/12 text-center font-semibold tracking-tight"></div>
+				<p class="w-1/2 text-start font-semibold tracking-tight">Title</p>
+				<p class="w-1/2 text-start font-semibold tracking-tight">Created at</p>
+			</div> -->
 			<div class="flex flex-col gap-2">
 				{#each filteredPasswords as password}
-					<TrashedPasswordCard {password} {handleRemoveFromTrash} {handlePermanentDelete} />
+					<TrashedPasswordCard {password} />
 				{/each}
 			</div>
 		</BlurFade>

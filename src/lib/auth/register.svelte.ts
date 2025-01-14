@@ -17,6 +17,10 @@ const register = async (email: string, username: string, password: string): Prom
 		})
 	});
 
+	if (!res.ok) {
+		throw new Error(await res.json());
+	}
+
 	return res;
 };
 

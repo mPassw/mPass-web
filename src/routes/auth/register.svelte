@@ -51,11 +51,6 @@
 
 			const res = await register(registerEmail, registerDisplayName, registerPassword);
 
-			if (res.status === 409) {
-				toast.error('Email already in use');
-				return;
-			}
-
 			const data = await res.json();
 
 			if (data.error) {
@@ -71,8 +66,8 @@
 			}
 
 			userState.email = registerEmail;
-		} catch {
-			toast.error('Unknown error');
+		} catch (err: any) {
+			toast.error(err.message || 'Unknown error');
 		} finally {
 			isLoading = false;
 		}
