@@ -262,9 +262,9 @@
 							again on each device.
 						</Dialog.Description>
 					</Dialog.Header>
-					<Dialog.Footer>
+					<Dialog.Footer class="gap-1.5">
 						<Button variant="destructive" onclick={deauthorize}>Deauthorize</Button>
-						<Button variant="default" onclick={() => (isDeauthorizeDialogOpen = false)}>
+						<Button variant="secondary" onclick={() => (isDeauthorizeDialogOpen = false)}>
 							Cancel
 						</Button>
 					</Dialog.Footer>
