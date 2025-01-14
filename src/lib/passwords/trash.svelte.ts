@@ -1,3 +1,4 @@
+import { goto } from '$app/navigation';
 import { passwordsState } from '@/state/passwordsState.svelte';
 import { userState } from '@/state/userState.svelte';
 
@@ -10,6 +11,11 @@ const movePasswordToTrash = async (id: number) => {
 	});
 
 	if (!res.ok) {
+		if (res.status === 498) {
+			userState.reset();
+			await goto('/auth');
+		}
+
 		throw new Error(await res.json());
 	}
 
@@ -25,6 +31,11 @@ const movePasswordFromTrash = async (id: number) => {
 	});
 
 	if (!res.ok) {
+		if (res.status === 498) {
+			userState.reset();
+			await goto('/auth');
+		}
+
 		throw new Error(await res.json());
 	}
 

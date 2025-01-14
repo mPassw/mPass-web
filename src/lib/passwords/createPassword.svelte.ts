@@ -2,6 +2,7 @@ import { passwordsState, type PasswordBase } from '@/state/passwordsState.svelte
 import { encryptPasswordBase } from './encryptPassword.svelte';
 import { userState } from '@/state/userState.svelte';
 import { getPasswords } from './getPasswords.svelte';
+import { goto } from '$app/navigation';
 
 const createPassword = async (password: PasswordBase): Promise<void> => {
 	const encryptedPassword = await encryptPasswordBase(password);
@@ -24,6 +25,11 @@ const createPassword = async (password: PasswordBase): Promise<void> => {
 	});
 
 	if (!res.ok) {
+		if (res.status === 498) {
+			userState.reset();
+			await goto('/auth');
+		}
+
 		throw new Error('Failed to create password');
 	}
 

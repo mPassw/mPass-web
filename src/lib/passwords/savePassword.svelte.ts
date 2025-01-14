@@ -1,6 +1,7 @@
 import type { Password } from '@/state/passwordsState.svelte';
 import { encryptString } from './encryptPassword.svelte';
 import { userState } from '@/state/userState.svelte';
+import { goto } from '$app/navigation';
 
 const savePassword = async (password: Password) => {
 	let updatedLogin = password.login;
@@ -50,6 +51,11 @@ const savePassword = async (password: Password) => {
 	});
 
 	if (!res.ok) {
+		if (res.status === 498) {
+			userState.reset();
+			await goto('/auth');
+		}
+
 		throw new Error('Failed to save password');
 	}
 };

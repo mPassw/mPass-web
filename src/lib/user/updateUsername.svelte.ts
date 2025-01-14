@@ -1,3 +1,4 @@
+import { goto } from '$app/navigation';
 import { userState } from '@/state/userState.svelte';
 
 const updateUsername = async (masterPassword: string, newUsername?: string): Promise<Response> => {
@@ -15,6 +16,13 @@ const updateUsername = async (masterPassword: string, newUsername?: string): Pro
 			username: newUsername?.length ? newUsername : null
 		})
 	});
+
+	if (res.status === 498) {
+		userState.reset();
+		await goto('/auth');
+
+		throw new Error('Invalid token');
+	}
 
 	return res;
 };

@@ -1,3 +1,4 @@
+import { goto } from '$app/navigation';
 import { userState } from '@/state/userState.svelte';
 
 const updateEmailGetCode = async (): Promise<void> => {
@@ -9,6 +10,10 @@ const updateEmailGetCode = async (): Promise<void> => {
 	});
 
 	if (!res.ok) {
+		if (res.status === 498) {
+			userState.reset();
+			await goto('/auth');
+		}
 		throw new Error(await res.text());
 	}
 };
@@ -39,6 +44,11 @@ const updateEmail = async (
 	});
 
 	if (!res.ok) {
+		if (res.status === 498) {
+			userState.reset();
+			await goto('/auth');
+		}
+
 		throw new Error(await res.text());
 	}
 };
