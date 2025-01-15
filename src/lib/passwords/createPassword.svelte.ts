@@ -7,7 +7,7 @@ import { goto } from '$app/navigation';
 const createPassword = async (password: PasswordBase): Promise<void> => {
 	const encryptedPassword = await encryptPasswordBase(password);
 
-	const res = await fetch(`${userState.serverUrl}/passwords/new`, {
+	const res = await fetch(`${userState.serverUrl}/passwords/add`, {
 		method: 'POST',
 		headers: {
 			'Content-Type': 'application/json',

@@ -14,6 +14,8 @@
 	import { toast } from 'svelte-sonner';
 	import { updateEmail, updateEmailGetCode } from '@/user/updateEmail.svelte';
 	import { generateSaltAndVerifier } from '@/auth/register.svelte';
+	import DeleteAccount from './deleteAccount.svelte';
+	import DeletePasswords from './deletePasswords.svelte';
 
 	let isLoading: boolean = $state(false);
 
@@ -270,14 +272,8 @@
 					</Dialog.Footer>
 				</Dialog.Content>
 			</Dialog.Root>
-			<Button variant="destructive">
-				<Icon icon="material-symbols:password-2-off-rounded" font-size="20" />
-				Delete Passwords
-			</Button>
-			<Button variant="destructive" disabled>
-				<Icon icon="lucide:user-round-x" font-size="20" />
-				Delete Account
-			</Button>
+			<DeletePasswords />
+			<DeleteAccount />
 		</div>
 	</div>
 </BlurFade>
