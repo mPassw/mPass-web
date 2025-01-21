@@ -5,9 +5,8 @@ import wasm from '@phi-ag/argon2/argon2.wasm?url';
 import initialize from '@phi-ag/argon2/fetch';
 import wordsAlpha from '$lib/assets/words_alpha.txt';
 
-// base fields for a password object
-// can be used to create a new password
 type PasswordBase = {
+	createdAt: Date | string;
 	title: string;
 	websites: string[];
 	login?: string;
@@ -15,14 +14,12 @@ type PasswordBase = {
 	note?: string;
 	salt: string;
 	nonce: string;
+	inTrash: boolean;
 };
 
-// additional fields from the database
 type Password = PasswordBase & {
 	id: number;
-	createdAt: Date;
 	updatedAt?: Date;
-	inTrash: boolean;
 	decrypted: boolean;
 };
 
